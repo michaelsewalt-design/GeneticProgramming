@@ -45,6 +45,8 @@ async function generateFitnessFunction(userIdea) {
   if (!response.ok || !data.content) {
     throw new Error(data.error?.message || JSON.stringify(data));
   }
+  const text = data.content.map(b => b.text || "").join("");
+  console.log("RAW API RESPONSE:", text);
  console.log("CLEAN ATTEMPT:", JSON.stringify(text.substring(0, 50)));
 const firstBrace = text.indexOf("{");
 const lastBrace = text.lastIndexOf("}");
