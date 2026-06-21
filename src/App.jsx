@@ -51,9 +51,7 @@ async function generateFitnessFunction(userIdea) {
 const firstBrace = text.indexOf("{");
 const lastBrace = text.lastIndexOf("}");
 const clean = text.slice(firstBrace, lastBrace + 1);
-return JSON.parse(clean.replace(/[\u0000-\u001F\u007F]/g, m =>
-  m === "\n" ? "\\n" : m === "\r" ? "\\r" : m === "\t" ? "\\t" : ""
-));
+return JSON.parse(clean);
 }
 
 // ═══════════════════════════════════════════════════════════
