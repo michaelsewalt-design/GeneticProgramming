@@ -483,6 +483,7 @@ export default function App() {
                   {[{ label: "Generatie 0", data: firstGeneration }, { label: `Generatie ${generation}`, data: population }].map(({ label, data }) => data && (
                     <div key={label} style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, color: "#475569", marginBottom: 4, letterSpacing: 1 }}>{label.toUpperCase()}</div>
+                      
                       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         {[...data].sort((a, b) => fitnessFn(...b) - fitnessFn(...a)).slice(0, 20).map((ind, row) => (
                           <div key={row} style={{ display: "flex", gap: 2 }}>
@@ -496,6 +497,20 @@ export default function App() {
                           </div>
                         ))}
                       </div>
+                      <div style={{ display: "flex", gap: 2, marginTop: 4 }}>
+                        {Array.from({ length: model.geneCount }, (_, col) => {
+                          const avg = data.reduce((s, ind) => s + ind[col], 0) / data.length;
+                          const scaled = model.geneMin[col] + avg * (model.geneMax[col] - model.geneMin[col]);
+                          return (
+                            <div key={col} style={{ flex: 1, fontSize: 8, color: "#94a3b8", textAlign: "center" }}>
+                              {scaled.toFixed(1)}{model.geneUnit?.[col] ? ` ${model.geneUnit[col]}` : ""}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+
+
                     </div>
                   ))}
                 </div>
