@@ -123,6 +123,7 @@ export default function App() {
   const [bestInd, setBestInd] = useState(null);
   const [bestScore, setBestScore] = useState(0);
 
+  const [firstGeneration, setFirstGeneration] = useState(null);
   const intervalRef = useRef(null);
   const stateRef = useRef({});
 
@@ -144,6 +145,9 @@ export default function App() {
       // Init populatie
       const pop = makePopulation(popSize, result.geneCount);
       setPopulation(pop);
+      setFirstGeneration(pop);
+
+
       setGeneration(0);
       setHistory([]);
       setBestInd(null);
@@ -465,22 +469,34 @@ export default function App() {
             {population.length > 0 && (
               <div style={styles.card}>
                 <div style={styles.cardLabel}>Populatie heatmap — {model.geneCount} genen × {Math.min(population.length, 20)} individuen</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 8 }}>
-                  {population.slice(0, 20).map((ind, row) => (
-                    <div key={row} style={{ display: "flex", gap: 2 }}>
-                      {ind.map((val, col) => (
-                        <div key={col} style={{
-                          flex: 1, height: 12, borderRadius: 2,
-                          background: `hsl(${160 + val * 60}, 70%, ${20 + val * 40}%)`,
-                          transition: "background 0.2s"
-                        }} title={`Gen ${col}: ${val.toFixed(2)}`} />
-                      ))}
+                {/* Legenda */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8, marginBottom: 10 }}>
+                  {model.geneLabels.map((label, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, background: `hsl(${160 + (i / model.geneCount) * 60}, 70%, 50%)` }} />
+                      <span style={{ fontSize: 10, color: "#94a3b8" }}>{i}: {label}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{ display: "flex", gap: 2, marginTop: 6 }}>
-                  {model.geneLabels.map((l, i) => (
-                    <div key={i} style={{ flex: 1, fontSize: 9, color: "#475569", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.split(" ")[0]}</div>
+                {/* Vergelijking gen 0 vs huidig */}
+                <div style={{ display: "flex", gap: 12 }}>
+                  {[{ label: "Generatie 0", data: firstGeneration }, { label: `Generatie ${generation}`, data: population }].map(({ label, data }) => data && (
+                    <div key={label} style={{ flex: 1 }}>
+                      <div style={{ fontSize: 9, color: "#475569", marginBottom: 4, letterSpacing: 1 }}>{label.toUpperCase()}</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {data.slice(0, 20).map((ind, row) => (
+                          <div key={row} style={{ display: "flex", gap: 2 }}>
+                            {ind.map((val, col) => (
+                              <div key={col} style={{
+                                flex: 1, height: 12, borderRadius: 2,
+                                background: `hsl(${160 + (col / model.geneCount) * 60}, 70%, ${20 + val * 40}%)`,
+                                transition: "background 0.2s"
+                              }} title={`${model.geneLabels[col]}: ${val.toFixed(2)}`} />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
