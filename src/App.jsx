@@ -48,16 +48,6 @@ async function generateFitnessFunction(userIdea) {
   const text = data.content.map(b => b.text || "").join("");
 // console.log("RAW API RESPONSE:", text);
 
-const clean = text
-  .replace(/```json[\s\S]*?```/g, m => m.slice(m.indexOf("\n") + 1, m.lastIndexOf("```")))
-  .replace(/^```json|^```|```$/gm, "")
-  .trim();
-
-
-//return JSON.parse(clean.replace(/[\u0000-\u001F\u007F]/g, m =>
-//  m === "\n" ? "\\n" : m === "\r" ? "\\r" : m === "\t" ? "\\t" : ""
-//));
-
 console.log("CLEAN ATTEMPT:", JSON.stringify(text.substring(0, 50)));
 const firstBrace = text.indexOf("{");
 const lastBrace = text.lastIndexOf("}");
