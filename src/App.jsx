@@ -255,7 +255,9 @@ export default function App() {
         <div style={styles.sidebar}>
           <div style={styles.card}>
             <div style={styles.cardLabel}>⚙ Parameters</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+           
+
+ <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <label style={{ fontSize: 11, color: "#94a3b8" }}>
                 Populatiegrootte
                 <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 16, margin: "4px 0" }}>{popSize}</div>
@@ -470,14 +472,30 @@ export default function App() {
               <div style={styles.card}>
                 <div style={styles.cardLabel}>Populatie heatmap — {model.geneCount} genen × {Math.min(population.length, 20)} individuen</div>
                 {/* Legenda */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8, marginBottom: 10 }}>
-                  {model.geneLabels.map((label, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, background: `hsl(${160 + (i / model.geneCount) * 60}, 70%, 50%)` }} />
-                      <span style={{ fontSize: 10, color: "#94a3b8" }}>{i}: {label}</span>
-                    </div>
-                  ))}
+            
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8, marginBottom: 10 }}>
+                  {model.geneLabels.map((label, i) => {
+                    const hue = 160 + (i / model.geneCount) * 60;
+                    return (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0, background: `hsl(${hue}, 70%, 50%)` }} />
+                        <span style={{ fontSize: 10, color: "#94a3b8", minWidth: 120 }}>{i}: {label}</span>
+                        <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
+                          {[0, 0.25, 0.5, 0.75, 1].map(v => (
+                            <div key={v} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                              <div style={{ width: 14, height: 10, borderRadius: 2, background: `hsl(${hue}, 70%, ${20 + v * 40}%)` }} />
+                              <span style={{ fontSize: 7, color: "#475569" }}>
+                                {(model.geneMin[i] + v * (model.geneMax[i] - model.geneMin[i])).toFixed(0)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+
+
                 {/* Vergelijking gen 0 vs huidig */}
                 <div style={{ display: "flex", gap: 12 }}>
                   {[{ label: "Generatie 0", data: firstGeneration }, { label: `Generatie ${generation}`, data: population }].map(({ label, data }) => data && (
