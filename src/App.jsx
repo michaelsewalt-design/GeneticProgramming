@@ -484,7 +484,7 @@ export default function App() {
                     <div key={label} style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, color: "#475569", marginBottom: 4, letterSpacing: 1 }}>{label.toUpperCase()}</div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {data.slice(0, 20).map((ind, row) => (
+                        {[...data].sort((a, b) => fitnessFn(...b) - fitnessFn(...a)).slice(0, 20).map((ind, row) => (
                           <div key={row} style={{ display: "flex", gap: 2 }}>
                             {ind.map((val, col) => (
                               <div key={col} style={{
