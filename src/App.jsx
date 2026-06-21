@@ -27,7 +27,8 @@ Reageer ALLEEN met geldig JSON in dit exacte formaat, geen uitleg of markdown:
   "geneUnit": ["eenheid 0", "eenheid 1", ...],
   "fitnessFunction": "<JS code als string, gebruikt genes[0..n], retourneert 0-100>",
   "description": "<één zin: wat optimaliseert dit model?>",
-  "perfectScore": "<wat betekent score=100 in mensentaal?>"
+   "perfectScore": "<wat betekent score=100 in mensentaal?>",
+  "fitnessExplanation": "<per gen in 1-2 zinnen: welke waarde levert de hoogste score en waarom, inclusief gewicht/bijdrage aan totaalscore>"
 }`;
 
 async function generateFitnessFunction(userIdea) {
@@ -361,7 +362,17 @@ export default function App() {
                 <pre style={styles.codeBlock}>
                   {`function fitness(genes) {\n${model.fitnessFunction}\n}`}
                 </pre>
-              </details>
+               </details>
+              {model.fitnessExplanation && (
+                <div style={{ marginTop: 12, padding: "10px 14px", background: "#0f172a", borderRadius: 8, border: "1px solid #1e3a5f" }}>
+                  <div style={{ fontSize: 9, color: "#38bdf8", letterSpacing: 2, marginBottom: 6 }}>SCORE UITLEG</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.7 }}>
+                    {model.fitnessExplanation.split(". ").map((s, i) => s.trim() && (
+                      <div key={i} style={{ marginBottom: 4 }}>· {s.trim()}{s.endsWith(".") ? "" : "."}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Status & Controls */}
