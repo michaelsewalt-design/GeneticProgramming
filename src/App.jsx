@@ -14,9 +14,7 @@ REGELS:
 - De fitness functie retourneert een getal tussen 0 en 100 (hoger = beter)
 - Schrijf de functie als JavaScript code (alleen de body, geen function declaratie)
 - Schaal genes[i] naar zinvolle waarden binnenin de functie
-- Geen comments in de fitnessFunction code, alleen pure JS
-- Maximaal 15 regels code in fitnessFunction
-- Gebruik compacte expressies, geen aparte variabelen voor tussenresultaten
+- Voeg korte inline comments toe die uitleggen wat elk gen betekent
 
 Reageer ALLEEN met geldig JSON in dit exacte formaat, geen uitleg of markdown:
 {
@@ -36,7 +34,7 @@ async function generateFitnessFunction(userIdea) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 2000,
+      max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userIdea }]
     })
@@ -46,13 +44,8 @@ async function generateFitnessFunction(userIdea) {
     throw new Error(data.error?.message || JSON.stringify(data));
   }
   const text = data.content.map(b => b.text || "").join("");
-// console.log("RAW API RESPONSE:", text);
-
-console.log("CLEAN ATTEMPT:", JSON.stringify(text.substring(0, 50)));
-const firstBrace = text.indexOf("{");
-const lastBrace = text.lastIndexOf("}");
-const clean = text.slice(firstBrace, lastBrace + 1);
-return JSON.parse(clean);
+  const clean = text.replace(/```json|```/g, "").trim();
+  return JSON.parse(clean);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -127,9 +120,9 @@ export default function App() {
   const intervalRef = useRef(null);
   const stateRef = useRef({});
 
-  const POP_SIZE = 30;
-  const MUT_RATE = 0.08;
-  const MAX_GEN = 100;
+  const [popSize, setPopSize] = useState(30);
+  const [mutRate, setMutRate] = useState(0.08);
+  const [maxGen, setMaxGen] = useState(100);
 
   // ── Stap 1: AI genereert fitness model ──
   const handleGenerate = async () => {
@@ -143,7 +136,7 @@ export default function App() {
       setModel(result);
       setFitnessFn(() => fn);
       // Init populatie
-      const pop = makePopulation(POP_SIZE, result.geneCount);
+      const pop = makePopulation(popSize, result.geneCount);
       setPopulation(pop);
       setGeneration(0);
       setHistory([]);
@@ -167,7 +160,7 @@ export default function App() {
     const newHist = [...hist, { gen: gen + 1, best: best.score, avg: avgScore }];
     stateRef.current.hist = newHist;
 
-    if (gen + 1 >= MAX_GEN || best.score >= 99) {
+    if (gen + 1 >= maxGen || best.score >= 99) {
       stateRef.current.gen = gen + 1;
       setGeneration(gen + 1);
       setHistory([...newHist]);
@@ -178,7 +171,7 @@ export default function App() {
       return;
     }
 
-    const newPop = nextGeneration(scored, POP_SIZE, MUT_RATE);
+    const newPop = nextGeneration(scored, popSize, mutRate);
     stateRef.current = { pop: newPop, gen: gen + 1, hist: newHist, fn };
     setPopulation([...newPop]);
     setGeneration(gen + 1);
@@ -244,6 +237,48 @@ export default function App() {
           <h1 style={styles.title}>Idee → Evolutie</h1>
           <p style={styles.subtitle}>Beschrijf een optimalisatiedoel. AI vertaalt het naar een fitness functie. Het algoritme evolueert naar de oplossing.</p>
         </header>
+
+        {/* ── Layout: sidebar + main ── */}
+        <div style={styles.layout}>
+
+        {/* ── Sidebar: GA Parameters ── */}
+        <div style={styles.sidebar}>
+          <div style={styles.card}>
+            <div style={styles.cardLabel}>⚙ Parameters</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <label style={{ fontSize: 11, color: "#94a3b8" }}>
+                Populatiegrootte
+                <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 16, margin: "4px 0" }}>{popSize}</div>
+                <input type="range" min="10" max="100" step="5" value={popSize}
+                  onChange={e => setPopSize(Number(e.target.value))}
+                  disabled={phase === "running"}
+                  style={{ width: "100%", accentColor: "#38bdf8" }} />
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#475569" }}><span>10</span><span>100</span></div>
+              </label>
+              <label style={{ fontSize: 11, color: "#94a3b8" }}>
+                Mutatiekans
+                <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 16, margin: "4px 0" }}>{(mutRate * 100).toFixed(0)}%</div>
+                <input type="range" min="1" max="30" step="1" value={Math.round(mutRate * 100)}
+                  onChange={e => setMutRate(Number(e.target.value) / 100)}
+                  disabled={phase === "running"}
+                  style={{ width: "100%", accentColor: "#38bdf8" }} />
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#475569" }}><span>1%</span><span>30%</span></div>
+              </label>
+              <label style={{ fontSize: 11, color: "#94a3b8" }}>
+                Max generaties
+                <div style={{ color: "#e2e8f0", fontWeight: 700, fontSize: 16, margin: "4px 0" }}>{maxGen}</div>
+                <input type="range" min="20" max="500" step="10" value={maxGen}
+                  onChange={e => setMaxGen(Number(e.target.value))}
+                  disabled={phase === "running"}
+                  style={{ width: "100%", accentColor: "#38bdf8" }} />
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#475569" }}><span>20</span><span>500</span></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main content ── */}
+        <div style={styles.main}>
 
         {/* ── Fase: Input ── */}
         {(phase === "input" || phase === "loading") && (
@@ -319,7 +354,7 @@ export default function App() {
 
             {/* Status & Controls */}
             <div style={styles.statsRow}>
-              <StatBox label="Generatie" value={generation} sub={`/ ${MAX_GEN}`} />
+              <StatBox label="Generatie" value={generation} sub={`/ ${maxGen}`} />
               <StatBox label="Beste score" value={bestScore ? bestScore.toFixed(1) : "—"} sub="/ 100" color="#4ade80" />
               <StatBox label="Status" value={
                 phase === "running" ? "Evolueert" :
@@ -329,7 +364,7 @@ export default function App() {
                 {phase === "ready" && <button style={{ ...styles.btn, ...styles.btnGreen }} onClick={startEvo}>▶ Start</button>}
                 {phase === "running" && <button style={{ ...styles.btn, ...styles.btnAmber }} onClick={pauseEvo}>⏸ Pauze</button>}
                 {phase === "done" && <button style={{ ...styles.btn, ...styles.btnGreen }} onClick={() => {
-                  const pop = makePopulation(POP_SIZE, model.geneCount);
+                  const pop = makePopulation(popSize, model.geneCount);
                   stateRef.current = { pop, gen: 0, hist: [], fn: fitnessFn };
                   setPopulation(pop); setGeneration(0); setHistory([]); setBestInd(null); setBestScore(0); setPhase("ready");
                 }}>↺ Opnieuw</button>}
@@ -446,6 +481,8 @@ export default function App() {
             )}
           </>
         )}
+        </div>{/* end main */}
+        </div>{/* end layout */}
       </div>
     </div>
   );
@@ -477,7 +514,10 @@ const styles = {
     backgroundImage: "linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px)",
     backgroundSize: "40px 40px",
   },
-  container: { maxWidth: 860, margin: "0 auto", padding: "32px 20px", position: "relative", zIndex: 1 },
+  container: { maxWidth: 1100, margin: "0 auto", padding: "32px 20px", position: "relative", zIndex: 1 },
+  layout: { display: "flex", gap: 20, alignItems: "flex-start" },
+  sidebar: { width: 220, flexShrink: 0, position: "sticky", top: 20 },
+  main: { flex: 1, minWidth: 0 },
   header: { marginBottom: 28, textAlign: "center" },
   badge: { fontSize: 10, letterSpacing: 4, color: "#38bdf8", marginBottom: 10, textTransform: "uppercase" },
   title: { fontSize: 32, fontWeight: 900, margin: "0 0 10px", letterSpacing: -1, color: "#f0f9ff" },
