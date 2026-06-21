@@ -40,6 +40,9 @@ async function generateFitnessFunction(userIdea) {
     })
   });
   const data = await response.json();
+  if (!response.ok || !data.content) {
+    throw new Error(data.error?.message || JSON.stringify(data));
+  }
   const text = data.content.map(b => b.text || "").join("");
   const clean = text.replace(/```json|```/g, "").trim();
   return JSON.parse(clean);
