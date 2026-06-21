@@ -45,7 +45,9 @@ async function generateFitnessFunction(userIdea) {
   }
   const text = data.content.map(b => b.text || "").join("");
   const clean = text.replace(/```json|```/g, "").trim();
-  return JSON.parse(clean);
+return JSON.parse(clean.replace(/[\u0000-\u001F\u007F]/g, m =>
+  m === "\n" ? "\\n" : m === "\r" ? "\\r" : m === "\t" ? "\\t" : ""
+));
 }
 
 // ═══════════════════════════════════════════════════════════
