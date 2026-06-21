@@ -14,7 +14,9 @@ REGELS:
 - De fitness functie retourneert een getal tussen 0 en 100 (hoger = beter)
 - Schrijf de functie als JavaScript code (alleen de body, geen function declaratie)
 - Schaal genes[i] naar zinvolle waarden binnenin de functie
-- Voeg korte inline comments toe die uitleggen wat elk gen betekent
+- Geen comments in de fitnessFunction code, alleen pure JS
+- Maximaal 15 regels code in fitnessFunction
+- Gebruik compacte expressies, geen aparte variabelen voor tussenresultaten
 
 Reageer ALLEEN met geldig JSON in dit exacte formaat, geen uitleg of markdown:
 {
@@ -34,7 +36,7 @@ async function generateFitnessFunction(userIdea) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 1000,
+      max_tokens: 2000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userIdea }]
     })
