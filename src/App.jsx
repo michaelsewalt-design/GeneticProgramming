@@ -44,7 +44,9 @@ async function generateFitnessFunction(userIdea) {
     throw new Error(data.error?.message || JSON.stringify(data));
   }
   const text = data.content.map(b => b.text || "").join("");
- const clean = text
+ console.log("RAW API RESPONSE:", text);
+
+const clean = text
   .replace(/```json[\s\S]*?```/g, m => m.slice(m.indexOf("\n") + 1, m.lastIndexOf("```")))
   .replace(/^```json|^```|```$/gm, "")
   .trim();
